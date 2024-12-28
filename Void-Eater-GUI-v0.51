@@ -1,0 +1,1238 @@
+--Void Eater Gui v0.51
+
+--Blackhole Infinite Void FE Script RAW
+
+local Players = game:GetService("Players")
+local char = Players.LocalPlayer.Character
+
+local teleportPart = Instance.new("Part",game:GetService("Workspace"))
+teleportPart.Position = Vector3.new(0,-math.huge,0)
+teleportPart.Anchored = true
+teleportPart.CanCollide = true
+teleportPart.Material = Enum.Material.Neon
+teleportPart.BrickColor = BrickColor.new("Really black")
+teleportPart.Name = "TeleportVoid"
+
+function teleport()
+	teleportPart.Position = Vector3.new(100000000,100000000,100000000)
+end
+
+teleport()
+
+local UserInputService = game:GetService("UserInputService")
+local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
+local Folder = Instance.new("Folder", game:GetService("Workspace"))
+local Part = Instance.new("Part", Folder)
+local Attachment1 = Instance.new("Attachment", Part)
+Part.Anchored = true
+Part.CanCollide = false
+Part.Transparency = 1
+Part.Position = Vector3.new(100000000,100000000,100000000)
+local Updated = Mouse.Hit + Vector3.new(0, 5, 0)
+local NetworkAccess = coroutine.create(function()
+	settings().Physics.AllowSleep = false
+	while game:GetService("RunService").RenderStepped:Wait() do
+		for _, Players in next, game:GetService("Players"):GetPlayers() do
+			if Players ~= game:GetService("Players").LocalPlayer then
+				Players.MaximumSimulationRadius = 0 
+				sethiddenproperty(Players, "SimulationRadius", 0) 
+			end 
+		end
+		game:GetService("Players").LocalPlayer.MaximumSimulationRadius = math.pow(math.huge,math.huge)
+		setsimulationradius(math.huge) 
+	end 
+end) 
+coroutine.resume(NetworkAccess)
+local function ForcePart(v)
+	if v:IsA("Part") and v.Anchored == false and v.Parent:FindFirstChild("Humanoid") == nil and v.Parent:FindFirstChild("Head") == nil and v.Name ~= "Handle" then
+		Mouse.TargetFilter = v
+		for _, x in next, v:GetChildren() do
+			if x:IsA("BodyAngularVelocity") or x:IsA("BodyForce") or x:IsA("BodyGyro") or x:IsA("BodyPosition") or x:IsA("BodyThrust") or x:IsA("BodyVelocity") or x:IsA("RocketPropulsion") then
+				x:Destroy()
+			end
+		end
+		if v:FindFirstChild("Attachment") then
+			v:FindFirstChild("Attachment"):Destroy()
+		end
+		if v:FindFirstChild("AlignPosition") then
+			v:FindFirstChild("AlignPosition"):Destroy()
+		end
+		if v:FindFirstChild("Torque") then
+			v:FindFirstChild("Torque"):Destroy()
+		end
+		v.CanCollide = false
+		local Torque = Instance.new("Torque", v)
+		Torque.Torque = Vector3.new(100000, 100000, 100000)
+		local AlignPosition = Instance.new("AlignPosition", v)
+		local Attachment2 = Instance.new("Attachment", v)
+		Torque.Attachment0 = Attachment2
+		AlignPosition.MaxForce = 9999999999999999
+		AlignPosition.MaxVelocity = math.huge
+		AlignPosition.Responsiveness = 200
+		AlignPosition.Attachment0 = Attachment2 
+		AlignPosition.Attachment1 = Attachment1
+	end
+end
+for _, v in next, game:GetService("Workspace"):GetDescendants() do
+	ForcePart(v)
+end
+game:GetService("Workspace").DescendantAdded:Connect(function(v)
+	ForcePart(v)
+end)
+
+Updated = teleportPart.Position + Vector3.new(0, 0, 0)
+
+spawn(function()
+	while game:GetService("RunService").RenderStepped:Wait() do
+		Attachment1.WorldCFrame = Updated
+	end
+end)
+
+--Top Camera FE Loop
+
+local part = Instance.new("Part",workspace)
+part.Size = Vector3.new(1,1,1)
+part.Transparency = 1
+part.Position = Vector3.new(805, 97, 2389)
+part.Locked = true
+part.Anchored = true
+part.Name = "LookatCameraPart"
+
+local camera = workspace.CurrentCamera
+
+local MinusPress =  Enum.KeyCode.Minus
+local EqualPress = Enum.KeyCode.Equals
+local UserInputService = game:GetService("UserInputService")
+
+function defaultcamera()
+	camera.CameraType = Enum.CameraType.Custom
+	camera.CameraSubject = game.Players.LocalPlayer.Character.Humanoid
+end
+
+function cameramap()
+	while wait() do
+		local pos = part.Position + Vector3.new(0,300, 0)
+		local lookAtPos = part.Position
+		camera.CameraSubject = part
+		camera.CameraType = Enum.CameraType.Scriptable
+		camera.CFrame = CFrame.lookAt(pos,lookAtPos)
+		if MinusPress then
+			break
+		end 
+	end
+end
+
+if MinusPress then
+	UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+		if input.KeyCode == MinusPress then
+			defaultcamera()
+		end
+	end)
+end
+
+if EqualPress then
+	UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+		if input.KeyCode == EqualPress then
+			cameramap()
+		end
+	end)
+end
+
+States = {}
+
+local Players = game:GetService("Players")
+local PlayerGui = Players.LocalPlayer.PlayerGui
+
+
+local ws = game:GetService("Workspace")
+local PartsFolder = Instance.new("Folder",ws)
+local PrisonHall = ws:WaitForChild("Prison_Halls")
+function EnabledRemoveParts(parts,CanC)
+PrisonHall.Parent = PartsFolder
+
+	for i,v in pairs(PartsFolder:GetDescendants()) do
+		if v:IsA("Part") then
+			v.Transparency = parts
+			v.CanCollide = CanC
+		end
+	end
+end
+
+--Created VoidEaterGui
+local VoidEaterGui = Instance.new("ScreenGui",PlayerGui)
+VoidEaterGui.Name = "VoidEaterGui1"
+
+local Background = Instance.new("Frame",VoidEaterGui)
+Background.Name = "Background"
+Background.Size = UDim2.new(1, 0,1, 0)
+Background.Position = UDim2.new(0, 0,0, 0)
+Background.BackgroundColor3 = Color3.new(0,0,0)
+Background.Visible = true
+Background.Transparency = 1
+
+local VoidEaterMenu = Instance.new("Frame", Background)
+VoidEaterMenu.Name = "VoidEaterMenu"
+VoidEaterMenu.BackgroundColor3 = Color3.new(0,0,0)
+VoidEaterMenu.Size = UDim2.new(0, 425,0, 190)
+VoidEaterMenu.Position = UDim2.new(0.306, -334,0.302, 28)
+VoidEaterMenu.Visible = false
+VoidEaterMenu.Transparency = 0
+local UICornerMenu = Instance.new("UICorner", VoidEaterMenu)
+
+--Created Drag the menu
+
+local UIDrag = Instance.new("UIDragDetector", VoidEaterMenu)
+UIDrag.Name = "Drag menu"
+
+local MinimizeButton = Instance.new("TextButton",VoidEaterMenu)
+MinimizeButton.Name = "MinimizeButton"
+MinimizeButton.BackgroundColor3 = Color3.new(0,0,0)
+MinimizeButton.Size = UDim2.new(0, 30,0, 30)
+MinimizeButton.Position = UDim2.new(0.927, 0,0, 0)
+MinimizeButton.Text = "-"
+MinimizeButton.TextColor3 = Color3.new(255,0,0)
+MinimizeButton.TextSize = 40
+local UICornerMinimize = Instance.new("UICorner", MinimizeButton)
+
+local Sidebar = Instance.new("Frame",VoidEaterMenu)
+Sidebar.Transparency = 0
+Sidebar.Size =  UDim2.new(0, 40,0, 190)
+Sidebar.Position = UDim2.new(0,0,0,0)
+Sidebar.BackgroundColor3 = Color3.new(0.235447, 0.241062, 0.251225)
+Sidebar.Name = "Sidebar"
+local UICornerSide = Instance.new("UICorner",Sidebar)
+local UIListLayout = Instance.new("UIListLayout",Sidebar)
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0.05, 0)
+
+
+--Created Frame into VoidEaterGui
+local ButtonGuiFrame = Instance.new("Frame",VoidEaterGui)
+ButtonGuiFrame.Transparency = 1
+ButtonGuiFrame.Size =  UDim2.new(0, 150,0,50)
+ButtonGuiFrame.Position = UDim2.new(0,0,0.75,0)
+ButtonGuiFrame.BackgroundColor3 = Color3.new(0,0,0)
+ButtonGuiFrame.Name = "ButtonGui"
+local UIAspectRatioButtonGui = Instance.new("UIAspectRatioConstraint",ButtonGuiFrame)
+UIAspectRatioButtonGui.AspectRatio = 2.56
+
+local VoidEaterButton =  Instance.new("TextButton",ButtonGuiFrame)
+VoidEaterButton.Size = UDim2.new(0, 150,0,50)
+VoidEaterButton.BackgroundColor3 = Color3.new(0,0,0)
+VoidEaterButton.Text = "Void Eater"
+VoidEaterButton.TextColor3 = Color3.new(0.656596, 0.147158, 1)
+VoidEaterButton.TextSize = 17.5
+VoidEaterButton.Name = "VoidEaterButton"
+local UIAspectRatioVoidEaterButton = Instance.new("UIAspectRatioConstraint", VoidEaterButton)
+UIAspectRatioVoidEaterButton.AspectRatio = 2.56
+local UICornerButton = Instance.new("UICorner", VoidEaterButton)
+
+VoidEaterButton.MouseMoved:Connect(function()
+	VoidEaterButton.TextSize = 20
+end)
+
+VoidEaterButton.MouseLeave:Connect(function()
+	VoidEaterButton.TextSize = 17.5
+end)
+
+--Created Players Folder
+local PlayersFolder = Instance.new("Folder",VoidEaterGui)
+PlayersFolder.Name = "Players"
+
+--Created VoidBoolValue, LoopkillBoolValue, ViewBoolValue, and MergeBoolValue
+local VoidBoolValue = Instance.new("BoolValue")
+VoidBoolValue.Name = "Void"
+VoidBoolValue.Value = false
+
+local LoopkillBoolValue = Instance.new("BoolValue")
+LoopkillBoolValue.Name = "Loopkill"
+LoopkillBoolValue.Value = false
+
+local ViewBoolValue = Instance.new("BoolValue")
+ViewBoolValue.Name = "View"
+ViewBoolValue.Value = false
+
+local MergeBoolValue = Instance.new("BoolValue")
+MergeBoolValue.Name = "Merge"
+MergeBoolValue.Value = false
+
+--Players Name
+local PlayerNameFolder = Instance.new("Folder")
+
+--Player Button
+
+local PlayerIcon = Instance.new("ImageButton", Sidebar)
+PlayerIcon.Image = "http://www.roblox.com/asset/?id=96391314123548"
+PlayerIcon.Size = UDim2.new(0, 40,0, 40)
+PlayerIcon.Position = UDim2.new(0.25, 0,0.05, 0)
+PlayerIcon.BackgroundTransparency = 1
+PlayerIcon.Name = "PlayersButton"
+local UICornerPlayerIcon = Instance.new("UICorner", PlayerIcon)
+
+PlayerIcon.MouseMoved:Connect(function()
+	PlayerIcon.BackgroundTransparency = 0.75
+end)
+
+PlayerIcon.MouseLeave:Connect(function()
+	PlayerIcon.BackgroundTransparency = 1
+end)
+
+--Created OpenPlayerFrame
+
+local OpenPlayer = Instance.new("Frame",VoidEaterMenu)
+OpenPlayer.Position = UDim2.new(0.11,0,0.15,0)
+OpenPlayer.Size = UDim2.new(0, 370,0, 138)
+OpenPlayer.BackgroundTransparency = 1
+OpenPlayer.Visible = false
+OpenPlayer.Name = "OpenPlayer"
+--local UICornerOpenPlayer = Instance.new("UICorner",OpenPlayer)
+
+local PlayerListFrame = Instance.new("Frame",OpenPlayer)
+PlayerListFrame.BackgroundTransparency = 0
+PlayerListFrame.Position = UDim2.new(0,0,0,0)
+PlayerListFrame.Size = UDim2.new(0,370,0,138)
+PlayerListFrame.BackgroundColor3 = Color3.fromRGB(65, 65, 66)
+PlayerListFrame.Name = "PlayerListFrame"
+
+local ScrollingFrame = Instance.new("ScrollingFrame",PlayerListFrame)
+ScrollingFrame.Size = UDim2.new(0, 370,0, 138)
+ScrollingFrame.BackgroundTransparency = 1
+ScrollingFrame.ScrollBarThickness = 12
+ScrollingFrame.CanvasSize = UDim2.new(0,0,10,0)
+ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
+ScrollingFrame.ScrollBarImageTransparency = 0
+ScrollingFrame.Position = UDim2.new(0,0,0,0)
+ScrollingFrame.ScrollingEnabled = true
+local UICornerPlayerListFrame = Instance.new("UICorner",PlayerListFrame)
+
+local UIGridLayoutScrolling = Instance.new("UIGridLayout",ScrollingFrame)
+UIGridLayoutScrolling.CellPadding = UDim2.new(0, 5,0, 5)
+UIGridLayoutScrolling.CellSize = UDim2.new(0, 350,0, 40)
+UIGridLayoutScrolling.SortOrder = Enum.SortOrder.LayoutOrder
+
+local UIPaddingScrolling = Instance.new("UIPadding",ScrollingFrame)
+UIPaddingScrolling.PaddingBottom = UDim.new(0,0)
+UIPaddingScrolling.PaddingLeft = UDim.new(0,5)
+UIPaddingScrolling.PaddingRight = UDim.new(0,10)
+UIPaddingScrolling.PaddingTop  = UDim.new(0,5)
+
+--Created Teams Frame
+local teamsFrame = Instance.new("Frame", PlayerListFrame)
+teamsFrame.Name = "TeamsFrame"
+teamsFrame.Transparency = 1
+teamsFrame.Size = UDim2.new(1,0,0.15,0)
+teamsFrame.Position = UDim2.new(0,0,1.01,0)
+
+local UIGridLayoutTeamsFrame = Instance.new("UIGridLayout", teamsFrame)
+UIGridLayoutTeamsFrame.CellPadding = UDim2.new(0,20,0,5)
+UIGridLayoutTeamsFrame.CellSize = UDim2.new(0,75,0,20)
+UIGridLayoutTeamsFrame.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIGridLayoutTeamsFrame.VerticalAlignment = Enum.VerticalAlignment.Center
+
+local teams = game:GetService("Teams")
+
+--Icon Team Button
+local iconTeamButton = Instance.new("TextButton")
+iconTeamButton.TextScaled = true
+iconTeamButton.FontFace = Font.new(
+	iconTeamButton.FontFace.Family,
+	Enum.FontWeight.Bold,
+	Enum.FontStyle.Normal
+)
+local UICornerIconTeamButton = Instance.new("UICorner",iconTeamButton)
+UICornerIconTeamButton.CornerRadius = UDim.new(0,8)
+
+--Created Guards Button
+local guardsButton = iconTeamButton:Clone()
+guardsButton.Parent = teamsFrame
+guardsButton.BackgroundColor = BrickColor.new(teams.Guards.TeamColor.Name)
+guardsButton.Name = "GuardsButton"
+guardsButton.Text = teams.Guards.Name
+
+guardsButton.MouseButton1Click:Connect(function()
+	workspace.Remote.TeamEvent:FireServer("Bright blue")
+end)
+
+--Created Inmates Button
+local inmatesButton = iconTeamButton:Clone()
+inmatesButton.Parent = teamsFrame
+inmatesButton.BackgroundColor = BrickColor.new(teams.Inmates.TeamColor.Name)
+inmatesButton.Name = "InmatesButton"
+inmatesButton.Text = teams.Inmates.Name
+
+inmatesButton.MouseButton1Click:Connect(function()
+	workspace.Remote.TeamEvent:FireServer("Bright orange")
+end)
+
+--Created Criminals Button
+local criminalsButton = iconTeamButton:Clone()
+criminalsButton.Parent = teamsFrame
+criminalsButton.BackgroundColor = BrickColor.new(teams.Criminals.TeamColor.Name)
+criminalsButton.Name = "CriminalsButton"
+criminalsButton.Text = teams.Criminals.Name
+
+criminalsButton.MouseButton1Click:Connect(function()
+	--[[workspace.Remote.TeamEvent:FireServer("Really red") is Anti Cheat :P)]]
+	local LCS = game.Workspace["Criminals Spawn"].SpawnLocation
+
+	LCS.CanCollide = false
+	LCS.Size = Vector3.new(51.05, 24.12, 54.76)
+	LCS.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+	LCS.Transparency = 0
+	wait(0.5)
+	LCS.CFrame = CFrame.new(-920.510803, 92.2271957, 2138.27002, 0, 0, -1, 0, 1, 0, 1, 0, 0)
+	LCS.Size = Vector3.new(6, 0.2, 6)
+	LCS.Transparency = 0
+end)
+
+--Created Neutral Button
+local neutralButton = iconTeamButton:Clone()
+neutralButton.Parent = teamsFrame
+neutralButton.BackgroundColor = BrickColor.new(teams.Neutral.TeamColor.Name)
+neutralButton.Name = "NeutralButton"
+neutralButton.Text = teams.Neutral.Name
+
+neutralButton.MouseButton1Click:Connect(function()
+	workspace.Remote.TeamEvent:FireServer("Medium stone grey")
+end)
+
+--Open Left Log Frame 
+
+local OpenLog = Instance.new("Frame",VoidEaterMenu)
+OpenLog.Position = UDim2.new(0.11, 0,0.15, 0)
+OpenLog.Size = UDim2.new(0,370,0,138)
+OpenLog.BackgroundTransparency = 1
+OpenLog.Visible = false
+OpenLog.Name = "OpenLeftLog"
+local UICornerOpenPlayer = Instance.new("UICorner",OpenLog)
+
+local LeftLogOutputFrame = Instance.new("Frame",OpenLog)
+LeftLogOutputFrame.BackgroundTransparency = 0
+LeftLogOutputFrame.BackgroundColor3 = Color3.fromRGB(65, 65, 66)
+LeftLogOutputFrame.Position = UDim2.new(0,0,0,0)
+LeftLogOutputFrame.Size = UDim2.new(0,370,0,138)
+LeftLogOutputFrame.Name = "LeftLogOutput"
+local UICornerLeftLogOutputFrame = Instance.new("UICorner",LeftLogOutputFrame)
+
+local ScrollingLeftLogOutputFrame = Instance.new("ScrollingFrame",LeftLogOutputFrame)
+ScrollingLeftLogOutputFrame.Size = UDim2.new(0, 370,0, 138)
+ScrollingLeftLogOutputFrame.BackgroundTransparency = 1
+ScrollingLeftLogOutputFrame.ScrollBarThickness = 12
+ScrollingLeftLogOutputFrame.CanvasSize = UDim2.new(0,0,10,0)
+ScrollingLeftLogOutputFrame.ScrollBarImageColor3 = Color3.fromRGB(0,0,0)
+ScrollingLeftLogOutputFrame.ScrollBarImageTransparency = 0
+ScrollingLeftLogOutputFrame.Position = UDim2.new(0,0,0,0)
+ScrollingLeftLogOutputFrame.ScrollingEnabled = false
+
+local UIGridLayoutLeftLogScrolling = Instance.new("UIGridLayout",ScrollingLeftLogOutputFrame)
+UIGridLayoutLeftLogScrolling.CellPadding = UDim2.new(0, 5,0, 5)
+UIGridLayoutLeftLogScrolling.CellSize = UDim2.new(0, 325,0, 15)
+UIGridLayoutLeftLogScrolling.SortOrder = Enum.SortOrder.LayoutOrder
+
+local UIPaddingLeftLogScrolling = Instance.new("UIPadding",ScrollingLeftLogOutputFrame)
+UIPaddingLeftLogScrolling.PaddingBottom = UDim.new(0,0)
+UIPaddingLeftLogScrolling.PaddingLeft = UDim.new(0,5)
+UIPaddingLeftLogScrolling.PaddingRight = UDim.new(0,10)
+UIPaddingLeftLogScrolling.PaddingTop  = UDim.new(0,5)
+
+--Created Clear Frame
+local clearFrame = Instance.new("Frame",LeftLogOutputFrame)
+clearFrame.Name = "clearFrame"
+clearFrame.Position = UDim2.new(0,0,1,1)
+clearFrame.Size = UDim2.new(0.985,0,0.15,0)
+clearFrame.Transparency = 1
+
+local UIGridLayoutClearFrame = Instance.new("UIGridLayout",clearFrame)
+UIGridLayoutClearFrame.CellSize = UDim2.new(0,75,0,20)
+UIGridLayoutClearFrame.CellPadding = UDim2.new(0,20,0,5)
+UIGridLayoutClearFrame.HorizontalAlignment = Enum.HorizontalAlignment.Right
+
+--Created Clear Button
+local clearButton = Instance.new("TextButton",clearFrame)
+clearButton.BackgroundColor = BrickColor.new("Bright blue")
+clearButton.Name = "clearButton"
+clearButton.Text = "Clear"
+clearButton.TextScaled = true
+clearButton.FontFace = Font.new(
+	clearButton.FontFace.Family,
+	Enum.FontWeight.Bold,
+	Enum.FontStyle.Normal
+)
+
+local UICornerClearButton = Instance.new("UICorner",clearButton)
+
+clearButton.MouseButton1Click:Connect(function()
+	for i,v in pairs(ScrollingLeftLogOutputFrame:GetChildren()) do
+		if v:IsA("TextLabel") then
+			v:Destroy()
+		end
+	end
+end)
+
+--Setting Button
+
+local SettingIcon = Instance.new("ImageButton", Sidebar)
+SettingIcon.Image = "rbxassetid://109523265281717"
+SettingIcon.Size = UDim2.new(0, 40,0, 40)
+SettingIcon.Position = UDim2.new(0.25, 0,0.05, 0)
+SettingIcon.BackgroundTransparency = 1
+SettingIcon.Name = "SettingButton"
+local UICornerSettingIcon = Instance.new("UICorner", SettingIcon)
+
+SettingIcon.MouseMoved:Connect(function()
+	SettingIcon.BackgroundTransparency = 0.75
+end)
+
+SettingIcon.MouseLeave:Connect(function()
+	SettingIcon.BackgroundTransparency = 1
+end)
+
+local OpenSetting = Instance.new("Frame",VoidEaterMenu)
+OpenSetting.Position = UDim2.new(0.11,0,0.15,0)
+OpenSetting.Size = UDim2.new(0,370,0,138)
+OpenSetting.BackgroundTransparency = 1
+OpenSetting.Visible = false
+OpenSetting.Name = "OpenSetting"
+local UICornerOpenSetting = Instance.new("UICorner",OpenSetting)
+
+--Left Log Button
+local LeftLogIcon = Instance.new("ImageButton", Sidebar)
+LeftLogIcon.Image = "rbxassetid://99804844393564"
+LeftLogIcon.Size = UDim2.new(0, 40,0, 40)
+LeftLogIcon.Position = UDim2.new(0.25, 0,0.05, 0)
+LeftLogIcon.BackgroundTransparency = 1
+LeftLogIcon.Name = "LeftLogButton"
+local UICornerLogIcon = Instance.new("UICorner", LeftLogIcon)
+
+--Blacklist Button
+local blacklistIcon = Instance.new("ImageButton", Sidebar)
+blacklistIcon.Image = "rbxassetid://70482663755639"
+blacklistIcon.Size = UDim2.new(0, 40,0, 40)
+blacklistIcon.Position = UDim2.new(0.25, 0,0.05, 0)
+blacklistIcon.BackgroundTransparency = 1
+blacklistIcon.Name = "LeftLogButton"
+local UICornerblacklistIcon = Instance.new("UICorner", blacklistIcon)
+
+PlayerIcon.MouseButton1Click:Connect(function()
+	OpenPlayer.Visible = true
+	OpenSetting.Visible = false
+	OpenLog.Visible = false
+	ScrollingFrame.Visible = true
+	ScrollingFrame.ScrollingEnabled = true
+	ScrollingLeftLogOutputFrame.Visible = false
+	ScrollingLeftLogOutputFrame.ScrollingEnabled = false
+end)
+
+SettingIcon.MouseButton1Click:Connect(function()
+	OpenPlayer.Visible = false
+	OpenSetting.Visible = true
+	OpenLog.Visible = false
+	ScrollingFrame.Visible = false
+	ScrollingFrame.ScrollingEnabled = false
+	ScrollingLeftLogOutputFrame.Visible = false
+	ScrollingLeftLogOutputFrame.ScrollingEnabled = false
+end)
+
+LeftLogIcon.MouseButton1Click:Connect(function()
+OpenPlayer.Visible = false
+OpenSetting.Visible = false
+OpenLog.Visible = true
+OpenLog.Visible = true
+ScrollingFrame.Visible = false
+ScrollingFrame.ScrollingEnabled = false
+ScrollingLeftLogOutputFrame.Visible = true
+ScrollingLeftLogOutputFrame.ScrollingEnabled = true
+end)
+
+LeftLogIcon.MouseMoved:Connect(function()
+	LeftLogIcon.BackgroundTransparency = 0.75
+end)
+
+LeftLogIcon.MouseLeave:Connect(function()
+	LeftLogIcon.BackgroundTransparency = 1
+end)
+
+blacklistIcon.MouseButton1Click:Connect(function()
+	OpenPlayer.Visible = false
+	OpenSetting.Visible = false
+	OpenLog.Visible = false
+	OpenLog.Visible = false
+	ScrollingFrame.Visible = false
+	ScrollingFrame.ScrollingEnabled = false
+	ScrollingLeftLogOutputFrame.Visible = false
+	ScrollingLeftLogOutputFrame.ScrollingEnabled = false
+end)
+
+blacklistIcon.MouseMoved:Connect(function()
+	blacklistIcon.BackgroundTransparency = 0.75
+end)
+
+blacklistIcon.MouseLeave:Connect(function()
+	blacklistIcon.BackgroundTransparency = 1
+end)
+
+--Created Blacklist Folder
+local BlacklistFolder = Instance.new("Folder",VoidEaterGui)
+BlacklistFolder.Name = "Blacklist"
+
+--[[--Created Left Log StringValue
+local LeftLogSpringValue = Instance.new("StringValue")
+LeftLogSpringValue.Name = "LeftPlayer"]]
+
+
+--[[local function playerblacklist(player) 
+	local log = LeftLogSpringValue:Clone()
+	log.Name = "LeftLog"
+	log.Parent = BlacklistFolder
+	log.Value = player.Name.." has left the game."
+end]]
+
+--Created Setting List
+local SettingList = Instance.new("Frame", OpenSetting)
+SettingList.BackgroundTransparency = 1
+SettingList.Position = UDim2.new(0,0,0,0)
+SettingList.Size = UDim2.new(0,0,0,0)
+SettingList.Name = "SettingList"
+local UIGridLayoutSettingList = Instance.new("UIGridLayout",SettingList)
+UIGridLayoutSettingList.FillDirection = Enum.FillDirection.Vertical
+UIGridLayoutSettingList.CellPadding = UDim2.new(0,0,0,10)
+UIGridLayoutSettingList.CellSize = UDim2.new(0,120,0,10)
+
+--Created CheckBox 
+local CheckBox = Instance.new("TextButton")
+CheckBox.BackgroundColor3 = Color3.new(255,255,255)
+CheckBox.Position = UDim2.new(0.912, 0,0,0)
+CheckBox.Size = UDim2.new(0,10,0,10)
+CheckBox.Name = "CheckBox"
+
+--Created Remove Parts Label
+local RemovePartsLabel = Instance.new("TextLabel",SettingList)
+RemovePartsLabel.Text = "Remove some parts:"
+RemovePartsLabel.BackgroundTransparency = 1
+RemovePartsLabel.TextColor3 = Color3.new(255,255,255)
+
+
+local CheckBoxRemoveParts = CheckBox:Clone()
+CheckBoxRemoveParts.Parent = RemovePartsLabel
+CheckBoxRemoveParts.Text = "✓"
+
+--Created ESP All Label
+local ESPallLabel = Instance.new("TextLabel",SettingList)
+ESPallLabel.Text = "ESP All:"
+ESPallLabel.BackgroundTransparency = 1
+ESPallLabel.TextColor3 = Color3.new(255,255,255)
+
+
+--Created CheckBox ESP All
+local CheckBoxESPAll = CheckBox:Clone()
+CheckBoxESPAll.Parent = ESPallLabel
+CheckBoxESPAll.Text = "✓"
+
+--Created Anti-Fling Label
+local AntiFlingLabel = Instance.new("TextLabel",SettingList)
+AntiFlingLabel.Text = "Anti-Fling:"
+AntiFlingLabel.BackgroundTransparency = 1
+AntiFlingLabel.TextColor3 = Color3.new(255,255,255)
+
+--Created CheckBox Anti-Fling
+local CheckBoxAntiFling = CheckBox:Clone()
+CheckBoxAntiFling.Parent = AntiFlingLabel
+CheckBoxAntiFling.Text = "✓"
+
+--Any Button
+MinimizeButton.MouseMoved:Connect(function()
+	MinimizeButton.TextSize = 45
+end)
+
+MinimizeButton.MouseLeave:Connect(function()
+	MinimizeButton.TextSize = 40
+end)
+
+VoidEaterButton.MouseButton1Down:Connect(function()
+	Background.Visible = true
+	OpenPlayer.Visible = true
+	OpenSetting.Visible = false
+	VoidEaterButton.Visible = false
+	VoidEaterMenu.Visible = true
+end)
+
+MinimizeButton.MouseButton1Down:Connect(function()
+	Background.Visible = false
+	OpenPlayer.Visible = true
+	OpenSetting.Visible = false
+	VoidEaterButton.Visible = true
+	VoidEaterMenu.Visible = false
+end)
+
+--Created Refresh Frame
+local RefreshFrame = Instance.new("Frame",PlayerListFrame)
+RefreshFrame.Position = UDim2.new (0,5,0,-22)
+RefreshFrame.Size = UDim2.new(0.2,0,0.145,0)
+RefreshFrame.BackgroundTransparency = 1
+RefreshFrame.Name = "RefreshFrame"
+
+--Created Refresh Icon
+local RefreshIcon = Instance.new("TextButton",RefreshFrame)
+RefreshIcon.Size = UDim2.new(1,0,1,0)
+RefreshIcon.Position = UDim2.new(0,0,0,0)
+RefreshIcon.Name = "RefreshButton"
+RefreshIcon.Visible = true
+RefreshIcon.Text = "Refresh"
+RefreshIcon.TextScaled = true
+--RefreshIcon.FontFace.Family = Enum.Font.FredokaOne.Name
+RefreshIcon.FontFace = Font.new(
+	--Enum.Font.FredokaOne.Name,
+	RefreshIcon.FontFace.Family,
+	Enum.FontWeight.Bold,
+	Enum.FontStyle.Normal
+)
+RefreshIcon.BackgroundColor3 = Color3.fromRGB(83, 191, 58)
+local UICornerRefresh = Instance.new("UICorner", RefreshIcon)
+UICornerRefresh.CornerRadius = UDim.new(0,8)
+
+--Created Setting Folder and BoolValue
+local SettingFolder = Instance.new("Folder", VoidEaterGui)
+SettingFolder.Name = "Setting"
+
+local RemovePartsBoolValue = Instance.new("BoolValue",SettingFolder)
+RemovePartsBoolValue.Value = true
+RemovePartsBoolValue.Name = "RemoveParts"
+
+local ESPAllBoolValue = Instance.new("BoolValue",SettingFolder)
+ESPAllBoolValue.Value = true
+ESPAllBoolValue.Name = "ESP All"
+
+local AntiFlingBoolValue = Instance.new("BoolValue",SettingFolder)
+AntiFlingBoolValue.Value = true
+AntiFlingBoolValue.Name = "AntiFling"
+
+RefreshIcon.MouseEnter:Connect(function()
+	RefreshIcon.BackgroundColor3 = Color3.new(0.301122, 0.500008, 0.205798)
+end)
+
+RefreshIcon.MouseLeave:Connect(function()
+	RefreshIcon.BackgroundColor3 = Color3.new(0.299763, 0.702785, 0.190646)
+end)
+
+EnabledRemoveParts(1,true)
+
+CheckBoxRemoveParts.MouseButton1Down:Connect(function()
+	if RemovePartsBoolValue.Value then
+		CheckBoxRemoveParts.Text = ""
+		RemovePartsBoolValue.Value = false
+		EnabledRemoveParts(0,true)
+	else
+		CheckBoxRemoveParts.Text = "✓"
+		RemovePartsBoolValue.Value = true
+		EnabledRemoveParts(1,true)
+	end
+end)
+
+function Esp(player)
+	pcall(function()
+		local Billboard = Instance.new("BillboardGui", game.Players.LocalPlayer.PlayerGui)
+		local Frame = Instance.new("Frame", Billboard)
+		local Label_Billboard = Instance.new("TextLabel", Billboard)
+
+		Billboard.Name = "ESP"
+		Billboard.Adornee = workspace:FindFirstChild(player.Name).Head
+		Billboard.AlwaysOnTop = true
+		Billboard.ExtentsOffset = Vector3.new(0, 1.25, 0)
+		Billboard.Size = UDim2.new(0, 6, 0, 6)
+
+		Frame.Name = "ESP_2"
+		Frame.BackgroundColor = BrickColor.new(player.TeamColor.Name)
+		Frame.BorderSizePixel = 0
+		Frame.BackgroundTransparency = 0.250
+		Frame.Position = UDim2.new(-0.5, 0, -0.5, 0)
+		Frame.Visible = true
+		Frame.Size = UDim2.new(2, 0, 2, 0)
+		Frame.ZIndex = 1
+
+		Label_Billboard.Name = "ESP_3"
+		Label_Billboard.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Label_Billboard.BackgroundTransparency = 1.000
+		Label_Billboard.Text = player.Name
+		Label_Billboard.Font = Enum.Font.GothamBlack
+		Label_Billboard.FontSize = Enum.FontSize.Size18
+		Label_Billboard.BorderSizePixel = 0
+		Label_Billboard.Visible = true
+		Label_Billboard.Position = UDim2.new(0, 0, 0, -40)
+		Label_Billboard.TextColor3 = Color3.fromRGB(255, 255, 255)
+		Label_Billboard.ZIndex = 2
+		Label_Billboard.Size = UDim2.new(2, 0, 10, 0)
+	end)
+end
+
+function Unesp(player)
+	for i,v in pairs(game.Players.LocalPlayer.PlayerGui:GetChildren()) do
+		if v:FindFirstChild("ESP_3") then
+			if v.ESP_3.Text == player.Name then
+				v:Destroy()
+			end
+		end
+	end
+end
+
+function ClearEsp()
+	for i,v in pairs(game.Players.LocalPlayer.PlayerGui:GetChildren()) do
+		if v.Name == "ESP" then
+			v:Destroy()
+		end
+	end
+end
+
+function EnabledESP()
+	States.Esp_All = true
+	States.Esp_Inmates = true
+	States.Esp_Guards = true
+	States.Esp_Criminals = true
+	States.Esp_Neutral = true
+	for i,v in pairs(game.Teams.Inmates:GetPlayers()) do
+		if States.Esp_Inmates then
+			if v ~= game.Players.LocalPlayer then
+				Esp(v)
+			end
+		end
+	end
+	for i,v in pairs(game.Teams.Guards:GetPlayers()) do
+		if States.Esp_Guards then
+			if v ~= game.Players.LocalPlayer then
+				Esp(v)
+			end
+		end
+	end
+	for i,v in pairs(game.Teams.Criminals:GetPlayers()) do
+		if States.Esp_Criminals then
+			if v ~= game.Players.LocalPlayer then
+				Esp(v)
+			end
+		end
+	end
+	for i,v in pairs(game.Teams.Neutral:GetPlayers()) do
+		if States.Esp_Neutral then
+			if v ~= game.Players.LocalPlayer then
+				Esp(v)
+			end
+		end
+	end
+	for i,v in pairs(game.Players:GetPlayers()) do
+		if States.Esp_All then
+			if v.TeamColor.Name ~= "Bright blue" and v.TeamColor.Name ~= "Bright orange" and v.TeamColor.Name ~= "Medium stone grey" and v.TeamColor.Name ~= "Really red" then
+			Esp(v)
+			end
+		end
+	end
+end
+
+if ESPAllBoolValue.Value then
+ EnabledESP()
+end
+CheckBoxESPAll.MouseButton1Down:Connect(function()
+	if ESPAllBoolValue.Value then
+		CheckBoxESPAll.Text = ""
+		ESPAllBoolValue.Value = false
+		States.Esp_All = false
+		States.Esp_Inmates = false
+		States.Esp_Guards = false
+		States.Esp_Criminals = false
+		States.Esp_Neutral = false
+		ClearEsp()
+	else
+		CheckBoxESPAll.Text = "✓"
+		ESPAllBoolValue.Value = true
+		EnabledESP()
+	end
+end)
+
+function EnabledAntiFling()
+	States.Anti_Fling = true
+	game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").Size = Vector3.new(math.huge, game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").Size.Y, math.huge)
+end
+
+EnabledAntiFling()
+CheckBoxAntiFling.MouseButton1Down:Connect(function()
+	if AntiFlingBoolValue.Value then
+		CheckBoxAntiFling.Text = ""
+		AntiFlingBoolValue.Value = false
+		States.Anti_Fling = false
+	else
+		CheckBoxAntiFling.Text = "✓"
+		AntiFlingBoolValue.Value = true
+		EnabledAntiFling()
+	end
+end)
+
+--Created Template Folder
+local Template = Instance.new("Folder", VoidEaterGui)
+Template.Name = "Template"
+
+local PlayerListBackground = Instance.new("TextLabel",Template)
+PlayerListBackground.Name = "PlayerListBackground"
+PlayerListBackground.Size = UDim2.new(0, 370,0, 138)
+PlayerListBackground.BackgroundTransparency = 0
+--PlayerListBackground.BackgroundColor3 = Color3.new(0.500008, 0.500008, 0.500008)
+PlayerListBackground.Text = ""
+PlayerListBackground.Visible = false
+
+local UICornerPlayerList = Instance.new("UICorner",PlayerListBackground)
+UICornerPlayerList.CornerRadius = UDim.new(0,8)
+
+local UIGridLayoutPlayerList = Instance.new("UIGridLayout",PlayerListBackground)
+UIGridLayoutPlayerList.CellPadding = UDim2.new(0,5,0,5)
+UIGridLayoutPlayerList.CellSize = UDim2.new(0,40,0,40)
+
+--Created Profile Picture
+local PfpImageLabel = Instance.new("ImageLabel",PlayerListBackground)
+PfpImageLabel.Name = "ProfilePic"
+
+local UICornerPfpImageLabel = Instance.new("UICorner",PfpImageLabel)
+
+--Created Username Label
+local UsernameLabel = Instance.new("TextLabel", PfpImageLabel)
+UsernameLabel.Size = UDim2.new(0,150,0,40)
+UsernameLabel.BackgroundTransparency = 1
+UsernameLabel.TextColor3 = Color3.new(255,255,255)
+UsernameLabel.TextScaled = true
+UsernameLabel.Position = UDim2.new(0, 40,0, 0)
+UsernameLabel.Text = ""
+UsernameLabel.Name = "UsernameLabel"
+UICornerNameLabel = Instance.new("UICorner",UsernameLabel)
+
+--IconButton
+local iconButton = Instance.new("ImageButton")
+iconButton.Size = UDim2.new(0,25,0,25)
+iconButton.BackgroundColor3 = Color3.fromRGB(128,128,128)
+iconButton.BackgroundTransparency = 0
+local UICornerIconButton = Instance.new("UICorner",iconButton)
+
+--Icon Label
+local iconLabel = Instance.new("TextLabel")
+iconLabel.Size = UDim2.new(0,25,0,10)
+iconLabel.BackgroundTransparency = 1
+iconLabel.TextSize = 5
+--iconLabel.FontFace.Family = Enum.Font.FredokaOne.Name
+iconLabel.FontFace = Font.new(
+	iconLabel.FontFace.Family,
+	Enum.FontWeight.Bold,
+	Enum.FontStyle.Normal
+)
+
+--Created Left Log Label
+local LeftLogLabel = Instance.new("TextLabel")
+LeftLogLabel.TextColor3 = Color3.fromRGB(255,0,0)
+LeftLogLabel.TextXAlignment = Enum.TextXAlignment.Left
+LeftLogLabel.TextYAlignment = Enum.TextYAlignment.Top
+
+--[[clickvoidButton(PlayerBackground:WaitForChild("ProfilePic").UsernameLabel.voidButton)
+clickloopkillButton(PlayerBackground:WaitForChild("ProfilePic").UsernameLabel.loopkillButton)]]
+
+local function playerleft(player)
+	--[[for i,v in pairs(PlayersFolder:GetDescendants()) do
+		if v:IsA("BoolValue") then
+			if v.Value == true then
+				local log = LeftLogLabel:Clone()
+				log.Transparency = 0
+				log.BackgroundTransparency = 1
+				log.Name = "PlayerLeft"
+				log.Parent = ScrollingLeftLogOutputFrame
+				log.Text = v.Parent.Name.." has left the game."
+				if #log.Parent:GetChildren() > 1 then
+					return
+				end
+			end
+		end
+	end]]
+	local log = LeftLogLabel:Clone()
+	log.Transparency = 0
+	log.BackgroundTransparency = 1
+	log.Name = "PlayerLeft"
+	log.Parent = ScrollingLeftLogOutputFrame
+	log.Text = player.Name.." has left the game."
+	if #log.Parent:GetChildren() > 1 then
+		return
+	end
+end
+
+--Created Void Button, Loopkill Button, and View Button
+local voidButton = iconButton:Clone()
+voidButton.Parent = UsernameLabel
+voidButton.Position = UDim2.new(0,160,0,5)
+voidButton.BackgroundTransparency = 0
+--voidButton.BackgroundColor = BrickColor.new(color)
+voidButton.Name = "voidButton"
+voidButton.Image = "rbxassetid://71205030207013"
+local voidLabel = iconLabel:Clone()
+voidLabel.Text = "Void"
+voidLabel.Position = UDim2.new(0,0,0,25)
+voidLabel.Parent = voidButton
+voidLabel.Name = "voidLabel"
+
+local function clickvoidButton(click)
+	click.MouseButton1Click:Connect(function()
+		local usernameplayer = click.Parent.Parent.Parent
+		local voidValue = PlayersFolder:WaitForChild(usernameplayer.Name).Void
+		if voidValue.Value == false then
+			click.BackgroundColor3 = Color3.fromRGB(65,66,65)
+			voidValue.Value = true
+		else
+			click.BackgroundColor3 = Color3.fromRGB(128,128,128)
+			voidValue.Value = false
+		end
+	end)
+	click.MouseButton1Down:Connect(function()
+		for i,v in pairs(BlacklistFolder:GetChildren()) do
+			if v.Name == v.Name then
+				return
+			end
+		end
+		--[[local usernameplayer = click.Parent.Parent.Parent
+		local blacklistplayeradded = PlayersFolder:WaitForChild(usernameplayer.Name):Clone()
+		blacklistplayeradded.Parent = BlacklistFolder
+		blacklistplayeradded.Void.Value = true
+		blacklistplayeradded.Loopkill.Value = true]]
+	end)
+end
+
+local loopkillButton = iconButton:Clone()
+loopkillButton.Parent = UsernameLabel
+loopkillButton.Position = UDim2.new(0,190,0,5)
+loopkillButton.Name = "loopkillButton"
+loopkillButton.Image = "rbxassetid://92766231922431"
+
+local loopkillLabel = iconLabel:Clone()
+loopkillLabel.Text = "Loopkill"
+loopkillLabel.Position = UDim2.new(0,0,0,25)
+loopkillLabel.Parent = loopkillButton
+loopkillLabel.Name = "loopkillLabel"
+
+local function clickloopkillButton(click)
+	click.MouseButton1Click:Connect(function()
+		local usernameplayer = click.Parent.Parent.Parent
+		local loopkillValue = PlayersFolder:WaitForChild(usernameplayer.Name).Loopkill
+		if loopkillValue.Value == false then
+			click.BackgroundColor3 = Color3.fromRGB(65,66,65)
+			loopkillValue.Value = true
+		else
+			click.BackgroundColor3 = Color3.fromRGB(128,128,128)
+			loopkillValue.Value = false
+		end
+	end)
+	click.MouseButton1Down:Connect(function()
+		for i,v in pairs(BlacklistFolder:GetChildren()) do
+			if v.Name == v.Name then
+				return
+			end
+		end
+		local usernameplayer = click.Parent.Parent.Parent
+		--[[local blacklistplayeradded = PlayersFolder:WaitForChild(usernameplayer.Name):Clone()
+		blacklistplayeradded.Parent = BlacklistFolder
+		blacklistplayeradded.Void.Value = true
+		blacklistplayeradded.Loopkill.Value = true]]
+	end)
+end
+
+local viewButton = iconButton:Clone()
+viewButton.Parent = UsernameLabel
+viewButton.Position = UDim2.new(0,220,0,5)
+viewButton.Name = "viewButton"
+viewButton.Image = "rbxassetid://128906621924400"
+
+local viewLabel = iconLabel:Clone()
+viewLabel.Text = "View"
+viewLabel.Position = UDim2.new(0,0,0,25)
+viewLabel.Parent = viewButton
+viewLabel.Name = "viewLabel"
+
+--[[
+function respawn(plr)
+	local char = plr.Character
+	if char:FindFirstChildOfClass("Humanoid") then char:FindFirstChildOfClass("Humanoid"):ChangeState(15) end
+	char:ClearAllChildren()
+	local newChar = Instance.new("Model")
+	newChar.Parent = workspace
+	plr.Character = newChar
+	wait()
+	plr.Character = char
+	newChar:Destroy()
+end
+
+local refreshCmd = false
+function refresh(plr)
+	refreshCmd = true
+	local Human = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid", true)
+	local pos = Human and Human.RootPart and Human.RootPart.CFrame
+	local pos1 = workspace.CurrentCamera.CFrame
+	respawn(plr)
+	task.spawn(function()
+		plr.CharacterAdded:Wait():WaitForChild("Humanoid").RootPart.CFrame, workspace.CurrentCamera.CFrame = pos, wait() and pos1
+		refreshCmd = false
+	end)
+end]]
+
+local function clickviewButton(click)
+	local viewing = workspace.CurrentCamera
+	click.MouseButton1Click:Connect(function()
+		local usernameplayer = click.Parent.Parent.Parent
+		local viewValue = PlayersFolder:WaitForChild(usernameplayer.Name).View
+		local playercharacter = Players:WaitForChild(usernameplayer.Name).Character
+		local head = playercharacter:FindFirstChild("Head")
+		Players.PlayerRemoving:Connect(function()
+			viewing.CameraType = Enum.CameraType.Custom
+			viewing.CameraSubject = game.Players.LocalPlayer.Character.Humanoid
+			click.BackgroundColor3 = Color3.fromRGB(128,128,128)
+			viewValue.Value = false
+		end)
+		if viewValue.Value == false then
+			click.BackgroundColor3 = Color3.fromRGB(65,66,65)
+			viewValue.Value = true
+				viewing.CameraSubject = playercharacter.Humanoid
+				viewing.CameraType = Enum.CameraType.Custom
+				--[[
+				local humanoid = playercharacter:WaitForChild("Humanoid")
+				if humanoid.Health <= 0 then
+					refresh(Players)
+				end]]
+		else
+			viewing.CameraSubject = game.Players.LocalPlayer.Character.Humanoid
+			click.BackgroundColor3 = Color3.fromRGB(128,128,128)
+			viewValue.Value = false
+			end
+	end)
+end
+
+--created merge button
+local mergeButton = iconButton:Clone()
+mergeButton.Parent = UsernameLabel
+mergeButton.Position = UDim2.new(0,250,0,5)
+mergeButton.Name = "mergeButton"
+mergeButton.Image = "rbxassetid://107869930575726"
+
+local mergeLabel = iconLabel:Clone()
+mergeLabel.Text = "Merge"
+mergeLabel.Position = UDim2.new(0,0,0,25)
+mergeLabel.Parent = mergeButton
+mergeLabel.Name = "mergeLabel"
+
+local function clickmergeButton(click)
+	click.MouseButton1Click:Connect(function()
+		local usernameplayer = click.Parent.Parent.Parent
+		local mergeValue = PlayersFolder:WaitForChild(usernameplayer.Name).Merge
+		if mergeValue.Value == false then
+			click.BackgroundColor3 = Color3.fromRGB(65,66,65)
+			mergeValue.Value = true
+				repeat
+					game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players:WaitForChild(usernameplayer.Name).Character.HumanoidRootPart.CFrame
+					game:GetService("RunService").Heartbeat:Wait()
+				until game.Players.LocalPlayer.Character.Humanoid.Health == 0 or mergeValue.Value == false
+		else
+			click.BackgroundColor3 = Color3.fromRGB(128,128,128)
+			mergeValue.Value = false
+		end
+	end)
+	click.MouseButton1Down:Connect(function()
+		for i,v in pairs(BlacklistFolder:GetChildren()) do
+			if v.Name == v.Name then
+				return
+			end
+		end
+		--[[local usernameplayer = click.Parent.Parent.Parent
+		local blacklistplayeradded = PlayersFolder:WaitForChild(usernameplayer.Name):Clone()
+		blacklistplayeradded.Parent = BlacklistFolder
+		blacklistplayeradded.Void.Value = true
+		blacklistplayeradded.Loopkill.Value = true]]
+	end)
+end
+
+--Created blacklistbutton 
+local blacklistButton = iconButton:Clone()
+blacklistButton.Parent = UsernameLabel
+blacklistButton.Position = UDim2.new(0,280,0,5)
+blacklistButton.Name = "blacklistButton"
+blacklistButton.Image = "rbxassetid://70482663755639"
+
+local blacklistLabel = iconLabel:Clone()
+blacklistLabel.Text = "Blacklist"
+blacklistLabel.Position = UDim2.new(0,0,0,25)
+blacklistLabel.Parent = blacklistButton
+blacklistLabel.Name = "blacklistLabel"
+
+
+--Table
+local PlayerList = {}
+local PlayerListPfp = {}
+
+--Running Players
+
+--[[voidButton.MouseButton1Click:Connect(function()
+	local usernameplayer = voidButton.Parent.Parent
+	--print(usernameplayer.Name)
+	print("Clicked")
+	local voidValue = PlayersFolder:GetChildren().Void
+	local FindedPlayer = game.Players:FindFirstChild(usernameplayer)
+	voidValue.Value = true
+end)]]
+
+function refresh()
+	for i,v in pairs(ScrollingFrame:GetChildren()) do
+		if v:IsA("TextLabel") then
+			v:Destroy()
+		end
+	end
+	for i,v in pairs(Players:GetChildren()) do
+		table.insert(PlayerListPfp, v.Name)
+		local PlayerBackground = Template.PlayerListBackground:Clone()
+		PlayerBackground.Parent = ScrollingFrame
+		PlayerBackground.Visible = true
+		PlayerBackground.BackgroundColor = BrickColor.new(game.Players:WaitForChild(v.Name).TeamColor.Name)
+		PlayerBackground.Name = v.Name..""
+		local Pfp = PlayerBackground.ProfilePic
+		Pfp.Image = "rbxthumb://type=AvatarHeadShot&id="..v.UserId.."&w=420&h=420"
+		local Username = Pfp.UsernameLabel
+		Username.Text = v.Name
+		clickvoidButton(PlayerBackground:WaitForChild("ProfilePic").UsernameLabel.voidButton)
+		clickloopkillButton(PlayerBackground:WaitForChild("ProfilePic").UsernameLabel.loopkillButton)
+		clickviewButton(PlayerBackground:WaitForChild("ProfilePic").UsernameLabel.viewButton)
+		clickmergeButton(PlayerBackground:WaitForChild("ProfilePic").UsernameLabel.mergeButton)
+	end
+end
+
+local function clear()
+	
+end
+
+local function playerjoined(player)
+	if player then
+		table.insert(PlayerList, player.Name)
+		local PlayerAdded = PlayerNameFolder:Clone()
+		PlayerAdded.Name = player.Name
+		PlayerAdded.Parent = PlayersFolder
+		local VoidBoolValueAdded = VoidBoolValue:Clone()
+		VoidBoolValueAdded.Parent = PlayerAdded
+		local LoopbackBoolValueAdded = LoopkillBoolValue:Clone()
+		LoopbackBoolValueAdded.Parent = PlayerAdded
+		local ViewBoolValueAdded = ViewBoolValue:Clone()
+		ViewBoolValueAdded.Parent = PlayerAdded
+		local MergeBoolValueAdded = MergeBoolValue:Clone()
+		MergeBoolValueAdded.Parent = PlayerAdded
+	end
+end
+
+for i,v in pairs(Players:GetChildren()) do
+	table.insert(PlayerList, v.Name)
+	local PlayerAdded = PlayerNameFolder:Clone()
+	PlayerAdded.Name = v.Name
+	PlayerAdded.Parent = PlayersFolder
+	local VoidBoolValueAdded = VoidBoolValue:Clone()
+	VoidBoolValueAdded.Parent = PlayerAdded
+	local LoopbackBoolValueAdded = LoopkillBoolValue:Clone()
+	LoopbackBoolValueAdded.Parent = PlayerAdded
+	local ViewBoolValueAdded = ViewBoolValue:Clone()
+	ViewBoolValueAdded.Parent = PlayerAdded
+	local MergeBoolValueAdded = MergeBoolValue:Clone()
+	MergeBoolValueAdded.Parent = PlayerAdded
+	RefreshIcon.MouseButton1Click:Connect(refresh)
+end
+
+Players.PlayerAdded:Connect(playerjoined)
+Players.PlayerRemoving:Connect(playerleft)
